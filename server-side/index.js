@@ -17,31 +17,30 @@ const client = new MongoClient(uri, {
   serverApi: ServerApiVersion.v1,
 });
 
-client.connect((err) => {
-  console.log("MongoDB connected successfully.");
-  const collection = client.db("test_db").collection("users");
-
-  let user = { name: "Mak1", email: "mak1@yahoo.com" };
-
-  let userExists = collection.find({ email: user.email });
-
-  console.log(userExists);
-
-  if (userExists) {
-    console.log("This email already used.");
-    client.close();
-    return;
-  }
-
+async function run() {
   try {
-    collection.insertOne(user);
+    await client.connect();
+
+    const collection = client.db("test_db").collection("users");
+
+    let user = { name: "Mak7", email: "mak7@yahoo.com" };
+
+    let userExists = await collection.findOne({ email: user.email });
+
+    if (userExists) {
+      console.log("This email already used.");
+      return;
+    }
+
+    await collection.insertOne(user);
     console.log("User added successfully.");
   } catch (error) {
     console.log(error);
+  } finally {
   }
+}
 
-  client.close();
-});
+run().catch(console.dir);
 
 app.get("/", (req, res) => {
   res.send("Hello from Server");
