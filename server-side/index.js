@@ -9,20 +9,36 @@ app.use(cors());
 
 const port = process.env.PORT || 5000;
 
-const mongo_user = process.env.MONGO_USER;
-const mongo_pass = process.env.MONGO_PASS;
+const uri = process.env.CONNECTION_STRING;
 
-const uri = `mongodb+srv://${mongo_user}:${mongo_pass}@cluster0.kdfnv.mongodb.net/myFirstDatabase?retryWrites=true&w=majority`;
 const client = new MongoClient(uri, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   serverApi: ServerApiVersion.v1,
 });
-client.connect((err) => {
-  const collection = client.db("test").collection("devices");
-  // perform actions on the collection object
 
-  console.log("MongoDB connected.");
+client.connect((err) => {
+  console.log("MongoDB connected successfully.");
+  const collection = client.db("test_db").collection("users");
+
+  let user = { name: "Mak1", email: "mak1@yahoo.com" };
+
+  let userExists = collection.find({ email: user.email });
+
+  console.log(userExists);
+
+  if (userExists) {
+    console.log("This email already used.");
+    client.close();
+    return;
+  }
+
+  try {
+    collection.insertOne(user);
+    console.log("User added successfully.");
+  } catch (error) {
+    console.log(error);
+  }
 
   client.close();
 });
